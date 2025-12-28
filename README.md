@@ -42,10 +42,14 @@
 | Путь | Минусы | Плюсы |
 |:----:|:------|:------|
 | Замена родной материнской платы | - Нужны навыки пайки или обжимания клемм, совместимых с платой, на которую вы будете менять<br>- Придется докупать бп на 24в, твердотельные реле для работы сушки<br>- В ace достаточно мало места для этого всего, придется выносить на корпус | - Есть возможность вернуться обратно, если вам не понравится hh |
-| Прошивка стоковой платы swd или dfu | - Теряется возможность вернуться на стоковую прошивку (даже если сняли дамп с процессора, по крайней мере у меня не получилось)<br> | Нужны вложения только на st link(2$) |
+| Прошивка стоковой платы swd или dfu | - Теряется возможность вернуться на стоковую прошивку (даже если сняли дамп с процессора, по крайней мере у меня не получилось)<br> | -Нужны вложения только на st link(2$) |
 
 # Сушилка
 На борту у ace pro имеется по 1 нагревателю, термистору, вентилятору на каждую секцию. Один транзистор управляет питанием сразу двух секций, и приходится осуществлять контроль температуры только по одному термистору, второй просто выводит температуру. А также если отключится вентилятор, охлаждающий нагреватель, он просто перегреется, и Klipper не упадет в ошибку, но хорошо, что anycubic подумали и поставили термопредохранитель под нагревателем (на 100 градусов). Эти проблемы можно решить с помощью дополнительного твердотельного реле, но его придется выносить за корпус, т.к. в нем просто нет места. А также неизвестно, какая максимальная температура сушки, при которой не поплывет пластик, максимальная, которую пробовал — 65 градусов (в камере).
+
+UPD
+
+Как выяснилось позже нагреватели ace pro расчитаны на 110v. На сколько безопасно можно использовать их на 220v мне не известно. Для решения этой проблемы можно соеденить нагреватели последовательно или заменить на подходящие 
 
 # Прошивка стоковой платы через swd
 У разных ревизий плат отличается внутреннее строение.
@@ -170,15 +174,16 @@ __!!! ОБРАТНОГО ПУТИ УЖЕ НЕ БУДЕТ !!!__
         Verification Complete: SHA = 9A0A75F1987338EE8D4E1A5736E793B1E63E8914
         Programming Complete
     
-    !!!Для повторной прошивки понадобиться прописать!!!
+    __!!!Для повторной прошивки понадобиться прописать!!!__
 
         python3 ~/katapult/scripts/flashtool.py -d /dev/ttyACM2 -b 230400 -r
+    
     И также запустить процесс прошивки с указаниеим файла
         
-13) Для минимальной преверки можно добавить в ваш printer.cfg
+13) Для минимальной проверки можно добавить в ваш printer.cfg
     ```
     [mcu mmu]
-    serial: /dev/serial/by-id/usb-Klipper_stm32f103xe_3CFC3B841812300147323935-if00 
+    serial: /dev/serial/by-id/usb-Klipper_stm32f103xe_3CFC3B841812300147323935-if00
     ```
 # Прошивка стоковой материнской платы через DFU
 Anycubic вывели пин boot0 к gnd через резистор, а рядом расположили пятку vcc. Узнал я это уже после того как прошил через swd, так что не могу утверждать, что способ сработает, ведь неизвестно, что производитель сделал с загрузчиком, а также по какой-то неведомой мне причине в DFU устройство не видится.
@@ -191,4 +196,108 @@ Anycubic вывели пин boot0 к gnd через резистор, а ряд
 3) Насчёт прошивки никак не подскажу, сам не проходил этот этап
 4) Убираем перемычку и ставим обратно (BOOT0-GND)
 
-Переходим к настройке happy hare
+# Переходим к установке и настройке happy hare
+
+Официальная страница: https://github.com/moggieuk/Happy-Hare
+
+### Преступим к установке:
+
+      cd ~
+      git clone https://github.com/moggieuk/Happy-Hare.git
+      ./install -i
+```
+----------------
+What type of MMU are you running?
+1) Enraged Rabbit Carrot Feeder v1.1
+2) ERCF v2.0
+3) ERCF v3.0
+4) Tradrack v1.0
+5) Angry Beaver v1.0
+6) Box Turtle v1.0
+7) Night Owl v1.0
+8) 3MS (Modular Multi Material System) v1.0
+9) 3D Chameleon
+10) PicoMMU
+11) QuattroBox v1.0
+12) QuattroBox v1.1
+13) MMX
+14) BigTreeTech ViViD (BETA)
+15) KMS
+16) Other / Custom (or just want starter config files)
+MMU Type (1-16)? 16
+----------------
+Which of these most closely resembles your MMU design (this allows for some tuning of config files)?{}
+1) Type-A (selector) with Encoder
+2) Type-A (selector), No Encoder
+3) Type-A (selector), No Encoder, No Servo, No ESpooler
+4) Type-B (mutliple filament drive steppers) with Encoder
+5) Type-B (multiple filament drive steppers) with shared Gate sensor and Encoder
+6) Type-B (multiple filament drive steppers) with shared Gate sensor, No Encoder
+7) Type-B (multiple filament drive steppers) with individual post-gear sensors and Encoder
+8) Type-B (multiple filament drive steppers) with individual post-gear sensors, No Encoder
+9) Just turn on all options and let me configure
+Type (1-9)? 3
+
+    IMPORTANT: Since you have a custom MMU with selector you will need to setup some CAD dimensions in mmu_parameters.cfg... See doc
+----------------
+How many gates (lanes) do you have?
+Number of gates? 4
+----------------
+Select mcu board type used to control MMU
+1) BTT MMB v1.0 (with CANbus)
+2) BTT MMB v1.1 (with CANbus)
+3) BTT MMB v2.0 (with CANbus)
+4) Fysetc Burrows ERB v1
+5) Fysetc Burrows ERB v2
+6) Standard EASY-BRD (with SAMD21)
+7) EASY-BRD with RP2040
+8) Mellow EASY-BRD v1.x (with CANbus)
+9) Mellow EASY-BRD v2.x (with CANbus)
+10) TZB v1.0
+11) AFC Lite v1.0
+12) WGB v3.0
+13) BTT SKR Pico v1.0
+14) BTT EBB 42 CANbus v1.2 (for MMX or Pico)
+15) Not in list / Unknown
+MCU Type (1-15)? 15
+----------------
+Would you like to have neopixel LEDs setup now for your MMU?
+Enable LED support? (y/n)? n
+----------------
+Selector homing using TMC Stallguard? This prevents the need for hard endstop homing but must be tuned
+MCU must have DIAG output for selector stepper. Can configure later
+Enable selector stallguard homing (y/n)? n
+----------------
+EndlessSpool? This uses filament runout detection to automate switching to new spool without interruption
+Enable EndlessSpool (y/n)? y
+----------------
+Finally, would you like me to include all the MMU config files into your printer.cfg file
+Add include? (y/n)? y
+    Would you like to include Mini 12864 screen menu configuration extension for MMU (only if you have one!)
+    Include menu (y/n)? y
+    Recommended: Would you like to include the default pause/resume macros supplied with Happy Hare
+    Include client_macros.cfg (y/n)? y
+    Addons: Would you like to include the EREC filament cutter macro (requires EREC servo installation)
+    Include mmu_erec_cutter.cfg (y/n)? n
+    Addons: Would you like to include the Blobifier purge system (requires Blobifier servo installation)
+    Include blobifier.cfg (y/n)? n
+```
+
+После установки берем конфиги из этого гита и заменяем папку mmu. 
+Сейчас будут параметры без настройки которых ничего работать не будет, указываю я их для того чтобы указать вам примерный путь для ace pro и не брать мои кривые конфиги :)
+1) В mmu_vars.cfg
+   ```
+   mmu_gear_rotation_distances = [16, 16, 16, 16] 
+   mmu_selector_offsets = [40, 30, 20, 10] # Отвечает за положения селектора относительно дома
+   ```
+2) В mmu_hardware.cfg
+   ```
+   selector_type: RotarySelector	# обязательно 
+   ```
+3) В mmu_parameters.cfg
+   ```
+   cad_gate_directions: 1, 1, 1, 1	
+   ```
+Ну и в целом все, остальное настраивается под ваш принтер / хотелки, в этом поможет офицальный гит hh
+
+P.S Советую откалиюровать mmu_selector_offsets и mmu_gear_rotation_distances, параметры взяты примерно  
