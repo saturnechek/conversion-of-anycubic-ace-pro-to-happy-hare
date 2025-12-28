@@ -42,7 +42,7 @@
 | Путь | Минусы | Плюсы |
 |:----:|:------|:------|
 | Замена родной материнской платы | - Нужны навыки пайки или обжимания клемм, совместимых с платой, на которую вы будете менять<br>- Придется докупать бп на 24в, твердотельные реле для работы сушки<br>- В ace достаточно мало места для этого всего, придется выносить на корпус | - Есть возможность вернуться обратно, если вам не понравится hh |
-| Прошивка стоковой платы swd или dfu | - Теряется возможность вернуться на стоковую прошивку (даже если сняли дамп с процессора, по крайней мере у меня не получилось)<br>- Для обновления прошивки нужен будет программатор (у меня не удалось запустить katapult) | - Если брали паяльник в руки хоть раз, то этого достаточно |
+| Прошивка стоковой платы swd или dfu | - Теряется возможность вернуться на стоковую прошивку (даже если сняли дамп с процессора, по крайней мере у меня не получилось)<br> | Нужны вложения только на st link(2$) |
 
 # Сушилка
 На борту у ace pro имеется по 1 нагревателю, термистору, вентилятору на каждую секцию. Один транзистор управляет питанием сразу двух секций, и приходится осуществлять контроль температуры только по одному термистору, второй просто выводит температуру. А также если отключится вентилятор, охлаждающий нагреватель, он просто перегреется, и Klipper не упадет в ошибку, но хорошо, что anycubic подумали и поставили термопредохранитель под нагревателем (на 100 градусов). Эти проблемы можно решить с помощью дополнительного твердотельного реле, но его придется выносить за корпус, т.к. в нем просто нет места. А также неизвестно, какая максимальная температура сушки, при которой не поплывет пластик, максимальная, которую пробовал — 65 градусов (в камере).
@@ -62,7 +62,7 @@ __!!! В зависимости от вашей ревизии платы сов
 
 Итак, BOM:
 - ST-Link v2
-- резистор 1.5 кОм для подтяжки 3.3В к D+
+- ~~резистор 1.5 кОм для подтяжки 3.3В к D+~~ без него понадобиться указать пины при сборке проишивки 
 - Колодки / DuPont (скорее опционально, можно и припаяться)
 
 ## Процесс прошивки:
@@ -72,35 +72,114 @@ __!!! В зависимости от вашей ревизии платы сов
 
 ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/3ed1990230bfc7427506d5a0d0f0fb49e8a9e4b6/photos/pinout.png)
 
-2) Подключаемся по ssh, собираем прошивку с такими параметрами, достаем с хоста (с помощью WinSCP или другим файловым менеджером).
+2) Подключаемся по ssh
 
-![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/1b01261e31c6ff0b7a432ea29c4232ead8a769b6/photos/menuconfig.png)
+4) Сборка bootloader katapult
+   
+   ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/1b01261e31c6ff0b7a432ea29c4232ead8a769b6/photos/katapult_menuconfig.png)
+   
+   ```
+    git clone https://github.com/Arksine/katapult
+    cd katapult
+    make menuconfig
+    make
+   ```
+5) Собираем прошивку
+    Если не поставилил резистор(оптимально)
+   
+    ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/1b01261e31c6ff0b7a432ea29c4232ead8a769b6/photos/menuconfig_without_resistor.png)       
 
-```
-cd klipper
-make clean 
-make menuconfig
-make
-```
-
-3) Устанавливаем драйвера и программу STM32 ST-LINK Utility.
+    ~~Если поставилил резистор~~
+   
+    ~~Паяем резистор к D+ и 3.3В, а также делаем технологический вырез в корпусе (если припаяли под платой).~~
+   
+    ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/1b01261e31c6ff0b7a432ea29c4232ead8a769b6/photos/menuconfig.png)
+   
+    ```
+    cd klipper
+    make clean 
+    make menuconfig
+    make
+    ```
+    
+6) Достаем с хоста (с помощью WinSCP или другим файловым менеджером) katapult.bin.
+   
+8) Устанавливаем драйвера и программу STM32 ST-LINK Utility.
 
 __!!! ОБРАТНОГО ПУТИ УЖЕ НЕ БУДЕТ !!!__
 
-4) Открываем файл прошивки, отключаем питание ace, включаем и подключаемся в STM32 ST-LINK Utility (обязательно в такой последовательности, иначе будет выпадать ошибка, что невозможно подключиться).
+8) Открываем katapult.bin, отключаем питание ace, включаем и подключаемся в STM32 ST-LINK Utility (обязательно в такой последовательности, иначе будет выпадать ошибка, что невозможно подключиться).
 
-5) Паяем резистор к D+ и 3.3В, а также делаем технологический вырез в корпусе (если припаяли под платой).
-
-6) Дальше есть несколько путей подключения:
+9) Дальше есть несколько путей подключения:
     1) Использовать стоковый хаб (понадобится провод MicroFit — USB)
     2) Припаяться к пинам и вывести удобный для вас разъем
 
-7) Если все прошло успешно, то в веб интерфейсе отобразится устройство или вводим в терминале ls /dev/ttyACM*.
+10) Узнаем видится ли устрйойсвто. В Веб интерфейсе отобразится устройство или вводим в терминале ls /dev/ttyACM*.
 
 ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/1b01261e31c6ff0b7a432ea29c4232ead8a769b6/photos/ls%20dev.png)
 
 ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/1b01261e31c6ff0b7a432ea29c4232ead8a769b6/photos/device%20mainsail.png)
 
+11) Прошивка klipper через ранее установленный katapult
+
+    Проверяем работает ли bootloader.
+    Вместо /dev/ttyACM2 указываем ваш путь из пункта 10
+        
+        python3 ~/katapult/scripts/flashtool.py -d /dev/ttyACM2 -b 230400 -s
+    
+    Вывод должен быть:
+    
+    ```
+    Connecting to Serial Device /dev/ttyACM2, baud 230400
+    Attempting to connect to bootloader
+    Katapult Connected
+    Software Version: v0.0.1-91-fdl3
+    Protocol Version: 1.1.0
+    Block Size: 64 bytes
+    Application Start: 0x8002000
+    MCU type: stm32f103xe
+    Status Request Complete
+    ```
+    
+    Вместо /dev/ttyACM2 указываем ваш путь из пункта 10
+    
+        python3 ~/katapult/scripts/flashtool.py -d /dev/ttyACM2 -b 230400 -f ~/klipper/out/klipper.bin
+    
+    
+        
+    Вывод должен быть:
+
+        Connecting to Serial Device /dev/ttyACM2, baud 230400
+        Detected Klipper binary version v0.12.0-458-gd886c176, MCU: stm32f103xe
+        Attempting to connect to bootloader
+        Katapult Connected
+        Software Version: v0.0.1-91-fdl3
+        Protocol Version: 1.1.0
+        Block Size: 64 bytes
+        Application Start: 0x8002000
+        MCU type: stm32f103xe
+        Flashing '/home/orangepi/klipper/out/klipper.bin'...
+
+        [##################################################]
+
+        Write complete: 34 pages
+        Verifying (block count = 531)...
+
+        [##################################################]
+
+        Verification Complete: SHA = 9A0A75F1987338EE8D4E1A5736E793B1E63E8914
+        Programming Complete
+    
+    !!!Для повторной прошивки понадобиться прописать!!!
+
+        python3 ~/katapult/scripts/flashtool.py -d /dev/ttyACM2 -b 230400 -r
+    И также запустить процесс прошивки с указаниеим файла
+        
+13) Для минимальной преверки можно добавить в ваш printer.cfg
+    ```
+    [mcu mmu]
+    serial: /dev/serial/by-id/usb-Klipper_stm32f103xe_3CFC3B841812300147323935-if00 
+    ```
 # Прошивка стоковой материнской платы через DFU
 Anycubic вывели пин boot0 к gnd через резистор, а рядом расположили пятку vcc. Узнал я это уже после того как прошил через swd, так что не могу утверждать, что способ сработает, ведь неизвестно, что производитель сделал с загрузчиком, а также по какой-то неведомой мне причине в DFU устройство не видится.
 
