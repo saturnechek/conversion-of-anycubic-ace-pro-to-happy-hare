@@ -76,7 +76,7 @@ __!!! В зависимости от вашей ревизии платы сов
 
 4) Сборка bootloader katapult
    
-   ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/1b01261e31c6ff0b7a432ea29c4232ead8a769b6/photos/katapult%20menuconfig.png)
+   ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/e4dd7303670d8632b2bcb5b6147ad77607ada709/photos/katapult%20menuconfig.png)
    
    ```
     git clone https://github.com/Arksine/katapult
@@ -87,7 +87,7 @@ __!!! В зависимости от вашей ревизии платы сов
 5) Собираем прошивку
     Если не поставилил резистор(оптимально)
    
-    ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/1b01261e31c6ff0b7a432ea29c4232ead8a769b6/photos/menuconfig%20without%20resistor.png)       
+    ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/e4dd7303670d8632b2bcb5b6147ad77607ada709/photos/menuconfig%20without%20resistor.png)       
 
     ~~Если поставилил резистор~~
    
