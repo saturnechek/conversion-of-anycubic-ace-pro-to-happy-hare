@@ -1,4 +1,4 @@
-# Перевод anycubic ace pro на happy hare(Happy ace)
+# Перевод anycubic ace pro на happy hare (Happy ace)
 Данная статья посвящена переводу anycubic ace pro на happy hare
 
 0. [Пути реализации](#Пути-реализации)
