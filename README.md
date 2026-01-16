@@ -107,7 +107,10 @@ __!!! В зависимости от вашей ревизии платы сов
 7) Открываем klipper.bin, отключаем питание ace, включаем и подключаемся в STM32 ST-LINK Utility (обязательно в такой последовательности, иначе будет выпадать ошибка, что невозможно подключиться).
 __!!! ОБРАТНОГО ПУТИ УЖЕ НЕ БУДЕТ !!!__
 9) Меняем start address на 0x08002000 и прошиваем
-10) Открываем katapult.bin меняем start address на 0x08000000 и ставим галочку на против skip flash erase
+    
+![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/27e1b495f7bb5c40edd46b9d93e6de8551ce2416/photos/firmware%20menu.png)
+
+12) Открываем katapult.bin меняем start address на 0x08000000 и ставим галочку на против skip flash erase
     
     __Для повторной прошивки__
     
@@ -120,7 +123,7 @@ __!!! ОБРАТНОГО ПУТИ УЖЕ НЕ БУДЕТ !!!__
         python3 ~/katapult/scripts/flashtool.py -d /dev/ttyACM2 -b 230400 -f ~/klipper/out/klipper.bin
    
    
-12) Дальше есть несколько путей подключения:
+13) Дальше есть несколько путей подключения:
     1) Использовать стоковый хаб (понадобится провод MicroFit — USB)
        
        ![Alt-текст](https://github.com/BlackFrogKok/BunnyACE/blob/d6ccf88f94635bab0808e6b7cbd1ee6fd0c649b3/.github/img/pinout.png)
@@ -129,7 +132,7 @@ __!!! ОБРАТНОГО ПУТИ УЖЕ НЕ БУДЕТ !!!__
        
     3) Припаяться к пинам и вывести удобный для вас разъем(см [pinout](#pinout))
 
-13)  Узнаем serial: путь к ACE (чаще всего, /dev/serial/by-id/usb-Klipper_stm32f103xe_3CFC3B841812300147323935-if00)
+14)  Узнаем serial: путь к ACE (чаще всего, /dev/serial/by-id/usb-Klipper_stm32f103xe_3CFC3B841812300147323935-if00)
 
    ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/1b01261e31c6ff0b7a432ea29c4232ead8a769b6/photos/ls%20dev.png)
 
