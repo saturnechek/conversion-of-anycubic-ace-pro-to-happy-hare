@@ -15,7 +15,7 @@
 
 
 ## Требования 
-1) Klipper + Moonraker(web ui)
+1) Klipper + Moonraker + Fluid/Mainsail
 2) Доступ к терминалу устройства с Klipper(ssh)
    
 ## Пути реализации
@@ -95,7 +95,7 @@ __!!! В зависимости от вашей ревизии платы сов
     make
     ```
     
-4) Скачиваем с хоста (с помощью WinSCP или другим файловым менеджером) katapult.bin.
+4) Скачиваем с хоста (с помощью WinSCP или другим файловым менеджером) katapult.bin и klipper.bin.
    
 5) Устанавливаем драйвера и программу STM32 ST-LINK Utility.
 
@@ -103,11 +103,24 @@ __!!! В зависимости от вашей ревизии платы сов
 #### Pinout
 ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/3ed1990230bfc7427506d5a0d0f0fb49e8a9e4b6/photos/pinout.png)
 
+
+7) Открываем klipper.bin, отключаем питание ace, включаем и подключаемся в STM32 ST-LINK Utility (обязательно в такой последовательности, иначе будет выпадать ошибка, что невозможно подключиться).
 __!!! ОБРАТНОГО ПУТИ УЖЕ НЕ БУДЕТ !!!__
+9) Меняем start address на 0x08002000 и прошиваем
+10) Открываем katapult.bin меняем start address на 0x08000000 и ставим галочку на против skip flash erase
+    
+    __Для повторной прошивки__
+    
+    Меняем /dev/ttyACM2 на свой путь до ace
 
-7) Открываем katapult.bin, отключаем питание ace, включаем и подключаемся в STM32 ST-LINK Utility (обязательно в такой последовательности, иначе будет выпадать ошибка, что невозможно подключиться).
-
-8) Дальше есть несколько путей подключения:
+        python3 ~/katapult/scripts/flashtool.py -d /dev/ttyACM2 -b 230400 -r
+    
+      Далее:
+    
+        python3 ~/katapult/scripts/flashtool.py -d /dev/ttyACM2 -b 230400 -f ~/klipper/out/klipper.bin
+   
+   
+12) Дальше есть несколько путей подключения:
     1) Использовать стоковый хаб (понадобится провод MicroFit — USB)
        
        ![Alt-текст](https://github.com/BlackFrogKok/BunnyACE/blob/d6ccf88f94635bab0808e6b7cbd1ee6fd0c649b3/.github/img/pinout.png)
@@ -116,76 +129,96 @@ __!!! ОБРАТНОГО ПУТИ УЖЕ НЕ БУДЕТ !!!__
        
     3) Припаяться к пинам и вывести удобный для вас разъем(см [pinout](#pinout))
 
-9)  Узнаем serial: путь к ACE (чаще всего, /dev/serial/by-id/usb-Klipper_stm32f103xe_3CFC3B841812300147323935-if00)
+13)  Узнаем serial: путь к ACE (чаще всего, /dev/serial/by-id/usb-Klipper_stm32f103xe_3CFC3B841812300147323935-if00)
 
    ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/1b01261e31c6ff0b7a432ea29c4232ead8a769b6/photos/ls%20dev.png)
 
    ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/1b01261e31c6ff0b7a432ea29c4232ead8a769b6/photos/device%20mainsail.png)
-
-10) Прошиваем klipper.bin через ранее установленный katapult
-
-    Проверяем работает ли bootloader.
-    __Вместо /dev/ttyACM2 указываем ваш путь из пункта 10__
-        
-        python3 ~/katapult/scripts/flashtool.py -d /dev/ttyACM2 -b 230400 -s
-    
-    Вывод:
-    
-    ```
-    Connecting to Serial Device /dev/ttyACM2, baud 230400
-    Attempting to connect to bootloader
-    Katapult Connected
-    Software Version: v0.0.1-91-fdl3
-    Protocol Version: 1.1.0
-    Block Size: 64 bytes
-    Application Start: 0x8002000
-    MCU type: stm32f103xe
-    Status Request Complete
-    ```
-    
-    __Вместо /dev/ttyACM2 указываем ваш путь из пункта 10__
-    
-          python3 ~/katapult/scripts/flashtool.py -d /dev/ttyACM2 -b 230400 -f ~/klipper/out/klipper.bin
-        
-    Вывод:
-
-        Connecting to Serial Device /dev/ttyACM2, baud 230400
-        Detected Klipper binary version v0.12.0-458-gd886c176, MCU: stm32f103xe
-        Attempting to connect to bootloader
-        Katapult Connected
-        Software Version: v0.0.1-91-fdl3
-        Protocol Version: 1.1.0
-        Block Size: 64 bytes
-        Application Start: 0x8002000
-        MCU type: stm32f103xe
-        Flashing '/home/orangepi/klipper/out/klipper.bin'...
-
-        [##################################################]
-
-        Write complete: 34 pages
-        Verifying (block count = 531)...
-
-        [##################################################]
-
-        Verification Complete: SHA = 9A0A75F1987338EE8D4E1A5736E793B1E63E8914
-        Programming Complete
-    
-    __!!! Для повторной прошивки !!!__
-
-        python3 ~/katapult/scripts/flashtool.py -d /dev/ttyACM2 -b 230400 -r
-    
-      Далее:
-    
-        python3 ~/katapult/scripts/flashtool.py -d /dev/ttyACM2 -b 230400 -f ~/klipper/out/klipper.bin
-        
         
 11) Проверка работоспособности:
     Добавить в printer.cfg
-    ```
-    [mcu mmu]
-    serial: /dev/serial/by-id/usb-Klipper_stm32f103xe_3CFC3B841812300147323935-if00
-    ```
+   ```
+   [temperature_sensor mcu_temp]
+   sensor_type: temperature_mcu
+   sensor_mcu: mmu
+   min_temp: 0
+   max_temp: 100
+   
+   [temperature_sensor drying_temp_2]
+   sensor_type: Generic 3950
+   sensor_pin: mmu:PC2
+   min_temp: 15
+   max_temp: 75
+   
+   [multi_pin drying_fan]
+   pins: mmu:PA7, mmu:PA6
+   
+   [controller_fan ace_mcu_fan]
+   pin: mmu:PB7
+   heater: drying
+   stepper: stepper_mmu_selector, stepper_mmu_gear
+   
+   [heater_fan drying_fan]
+   pin: multi_pin:drying_fan
+   heater: drying
+   heater_temp: 30
+   
+   [heater_generic drying]
+   control: watermark
+   sensor_type: Generic 3950
+   sensor_pin: mmu:PC3
+   heater_pin: mmu:PA0
+   min_temp: 15
+   max_temp: 75
+   
+   [output_pin gate_1_led]
+   pin: mmu:PB10
+   [output_pin gate_2_led]
+   pin: mmu:PB11
+   [output_pin gate_3_led]
+   pin: mmu:PA14
+   [output_pin gate_4_led]
+   pin: mmu:PA13
+   
+   [filament_switch_sensor gate_1]
+   pin:!mmu:PA4
+   [filament_switch_sensor gate_2]
+   pin:!mmu:PA5
+   [filament_switch_sensor gate_3]
+   pin:!mmu:PC4
+   [filament_switch_sensor gate_4]
+   pin:!mmu:PC5
+   
+   [manual_stepper mmu_gear]
+   step_pin: mmu:PB4
+   dir_pin: mmu:PB5
+   enable_pin: !mmu:PA1
+   rotation_distance: 2	# Bondtech 5mm Drive Gears. Overridden by 'mmu_gear_rotation_distance' in mmu_vars.cfg
+   microsteps: 32 				# Recommend 16. Increase only if you "step compress" issues when syncing
+   #full_steps_per_rotation: 200		# 200 for 1.8 degree, 400 for 0.9 degree
+   #gear_ratio: 10:12			# E.g. ERCF 80:20, Tradrack 50:17
+   
+   [tmc2208 stepper_mmu_gear]
+   uart_pin: mmu:PA10
+   run_current:0.8
+   
+   [manual_stepper mmu_selector]
+   step_pin: mmu:PD2
+   dir_pin: !mmu:PB3
+   enable_pin: !mmu:PA1
+   rotation_distance: 40
+   microsteps: 16 				# Don't need high fidelity
+   endstop_pin: mmu:PA15       # Selector microswitch
+   endstop_name: mmu_sel_home
+   
+   [tmc2208 stepper_mmu_selector]
+   uart_pin: mmu:PA3
+   run_current:0.8
+   ```
+
 # Прошивка стоковой платы через DFU
+__Не работает!!!!__
+
 Anycubic вывели пин boot0 к gnd через резистор, а рядом расположили пятку vcc. Узнал я это уже после того как прошил через swd, так что не могу утверждать, что способ сработает, ведь неизвестно, что производитель сделал с загрузчиком, а также по какой-то неведомой мне причине в DFU устройство не видится.
 
 ![Alt-текст](https://github.com/saturnechek/conversion-of-anycubic-ace-pro-to-happy-hare/blob/1b01261e31c6ff0b7a432ea29c4232ead8a769b6/photos/pinout%20dfu%20mode.png)
@@ -312,12 +345,10 @@ P.S Советую откалиюровать mmu_selector_offsets и mmu_gear_r
         
 # Мои наработки и мысли
 __не обязательно к прочтению__
-Ace имеет не стандартные драйвера о которых я информации не нашел, но распиновка сходится по даташиту tmc2208. Драйвера имеют общий пин enable, а также обязательно нужно указывать секцию [tmc2208 stepper_mmu_gear], иначе будут спонтанные lost comunication при загрузке / выгрузке филамента.
-
-Мое мнение! В данный момент покупать ace pro и заморачиваться с не стабильными драйверами или переходом на happy hare не имеет никакого смысла 
+Ace имеет не стандартные драйвера о которых я информации не нашел, но распиновка сходится по даташиту tmc2208. Драйвера имеют общий пин enable, а также обязательно нужно указывать секцию [tmc2208], иначе будут спонтанные lost comunication при загрузке / выгрузке филамента.
 
 ## Сушилка
-На борту у ace pro имеется по 1 нагревателю, термистору, вентилятору на каждую секцию. Один транзистор управляет питанием сразу двух секций, и приходится осуществлять контроль температуры только по одному термистору, второй просто выводит температуру. А также если отключится вентилятор, охлаждающий нагреватель, он просто перегреется, и Klipper не упадет в ошибку, но хорошо, что anycubic подумали и поставили термопредохранитель под нагревателем (на 100 градусов). Эти проблемы можно решить с помощью дополнительного твердотельного реле, но его придется выносить за корпус, т.к. в нем просто нет места. А также неизвестно, какая максимальная температура сушки, при которой не поплывет пластик, максимальная, которую пробовал — 65 градусов (в камере).
+На борту у ace pro имеется по 1 нагревателю, термистору, вентилятору на каждую секцию. Один транзистор управляет питанием сразу двух секций, и приходится осуществлять контроль температуры только по одному термистору, второй просто выводит температуру. 
 
 UPD
 
